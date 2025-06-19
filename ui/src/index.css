@@ -1,0 +1,58 @@
+body {
+  background: #181a1b;
+  color: #e8e6e3;
+  font-family: 'Segoe UI', Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+}
+
+a {
+  color: #8ab4f8;
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+input, select, button, textarea {
+  background: #23272a;
+  color: #e8e6e3;
+  border: 1px solid #444;
+  border-radius: 4px;
+  padding: 6px 10px;
+  margin-right: 8px;
+}
+
+input:focus, select:focus, textarea:focus {
+  outline: 2px solid #8ab4f8;
+}
+
+button {
+  background: #30363d;
+  color: #e8e6e3;
+  border: 1px solid #444;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+button:hover {
+  background: #444950;
+}
+
+nav {
+  background: #23272a;
+  padding: 10px 0;
+  border-radius: 6px;
+  margin-bottom: 20px;
+}
+
+ul {
+  background: #23272a;
+  border-radius: 6px;
+  padding: 10px 20px;
+}
+
+form {
+  margin-bottom: 16px;
+}
