@@ -4,8 +4,7 @@ import RatePage from "./RatePage";
 import AddInteractionPage from "./AddInteractionPage";
 import ViewInteractionPage from "./ViewInteractionPage";
 import ResultsPage from "./ResultsPage";
-
-const API = "http://localhost:8000"; // Adjust API URL as needed
+import API from "./config";
 
 function AddInteraction({ onAdd }) {
   const [description, setDescription] = useState("");

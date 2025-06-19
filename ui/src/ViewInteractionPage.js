@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
-
-const API = "http://localhost:8000";
+import API from "./config";
 
 function StarRating({ value, onChange }) {
   return (
@@ -70,6 +69,9 @@ export default function ViewInteractionPage() {
       <h2>Interaction</h2>
       <div>
         <b>{interaction.description}</b> <i>({new Date(interaction.date).toLocaleString()})</i>
+        <div>
+          <span>UUID: <code>{interaction.uuid}</code></span>
+        </div>
         <ul>
           {interaction.rates.map(rate => (
             <li key={rate.id}>
