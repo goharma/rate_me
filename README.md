@@ -1,6 +1,7 @@
 # rate_me
 
 # Build 
+npm install
 npm run build 
 
 # Run 
