@@ -84,7 +84,7 @@ export default function ViewInteractionPage() {
 
   return (
     <div>
-      <h2>Interaction</h2>
+      <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>Interaction</h2>
       <div>
         <b>{interaction.description}</b> <i>({formatCentralTime(interaction.date)})</i>
         <div>

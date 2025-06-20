@@ -133,7 +133,7 @@ export default function RatePage() {
     if (loading) return <div>Loading...</div>;
     return (
       <div>
-        <h2>Rate Interactions</h2>
+        <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>Rate Interactions</h2>
         <input
           className="search-box"
           type="text"
@@ -251,7 +251,7 @@ export default function RatePage() {
 
   return (
     <div>
-      <h2>Rate Interaction</h2>
+      <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>Rate Interaction</h2>
       <div style={{ marginBottom: 16 }}>
         <b>Interaction Description</b>
         <div>{interaction.description}</div>

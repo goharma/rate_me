@@ -120,14 +120,16 @@ export default function AddInteractionPage() {
 
   return (
     <div>
-      <h2>Interaction</h2>
-      {/* ...existing code for search and pagination above accordion... */}
+      <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>
+        Total Interactions: {filteredInteractions.length}
+      </h2>
       <div style={{
         marginBottom: 16,
         background: document.body.classList.contains("light-mode") ? "#f5f5f5" : undefined,
         borderRadius: 8,
         padding: 8
       }}>
+        {/* search and sort */}
         <input
           type="text"
           placeholder="Search by description"
@@ -140,7 +142,8 @@ export default function AddInteractionPage() {
             borderRadius: 4,
             padding: "6px 10px",
             width: "100%",
-            maxWidth: 320
+            maxWidth: 320,
+            marginBottom: 8
           }}
         />
         <br />
@@ -160,7 +163,106 @@ export default function AddInteractionPage() {
           <option value="date_asc">Date (Oldest First)</option>
           <option value="numratings_desc">Number of Ratings (Highest First)</option>
           <option value="numratings_asc">Number of Ratings (Lowest First)</option>
+          <option value="rating_desc">Average Rating (Highest First)</option>
+          <option value="rating_asc">Average Rating (Lowest First)</option>
         </select>
+      </div>
+      {totalPages > 1 && (
+        <div style={{ marginBottom: 12, display: "flex", justifyContent: "center", alignItems: "center" }}>
+          <button
+            onClick={() => setPage(page - 1)}
+            disabled={page === 1}
+            style={{ marginRight: 8 }}
+          >
+            Prev
+          </button>
+          <span>
+            Page {page} of {totalPages}
+          </span>
+          <button
+            onClick={() => setPage(page + 1)}
+            disabled={page === totalPages}
+            style={{ marginLeft: 8 }}
+          >
+            Next
+          </button>
+        </div>
+      )}
+      <div
+        className="accordion-summary"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+          border: "1.5px solid #444",
+          borderRadius: 8,
+          padding: "10px 20px",
+          marginBottom: 12,
+          minHeight: 32
+        }}
+      >
+        <form
+          onSubmit={handleSubmit}
+          style={{
+            display: "flex",
+            alignItems: "center",
+            width: "100%",
+            gap: 8,
+            margin: 0
+          }}
+        >
+          <input
+            type="text"
+            value={description}
+            onChange={e => setDescription(e.target.value)}
+            placeholder="Interaction description"
+            required
+            style={{
+              width: "40%",
+              minWidth: 120,
+              maxWidth: 300,
+              marginBottom: 0,
+              background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+              color: document.body.classList.contains("light-mode") ? "#23272a" : "#e8e6e3",
+              border: "1px solid #444",
+              borderRadius: 4,
+              padding: "6px 10px"
+            }}
+          />
+          <input
+            type="datetime-local"
+            value={date}
+            onChange={e => setDate(e.target.value)}
+            required
+            style={{
+              marginBottom: 0,
+              background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+              color: document.body.classList.contains("light-mode") ? "#23272a" : "#e8e6e3",
+              border: "1px solid #444",
+              borderRadius: 4,
+              padding: "6px 10px"
+            }}
+          />
+          <button
+            type="submit"
+            style={{
+              marginLeft: 8,
+              background: "#30363d",
+              color: "#8ab4f8",
+              border: "1px solid #444",
+              borderRadius: 4,
+              cursor: "pointer",
+              padding: "6px 18px"
+            }}
+          >
+            Add
+          </button>
+          {success && (
+            <span style={{ color: "green", marginLeft: 12 }}>
+              Interaction added!
+            </span>
+          )}
+        </form>
       </div>
       <div>
         {pagedInteractions.map((inter, idx) => {
@@ -246,8 +348,77 @@ export default function AddInteractionPage() {
                     }}
                     title={inter.description}
                   >
-                    {inter.description}
+                    {isEditing ? (
+                      <input
+                        type="text"
+                        value={editValue}
+                        onChange={e => setEditValue(e.target.value)}
+                        onClick={e => e.stopPropagation()}
+                        onKeyDown={async e => {
+                          if (e.key === "Enter") {
+                            e.preventDefault();
+                            if (isEditing && editValue !== inter.description) {
+                              await fetch(`${API}/interaction/${inter.id}`, {
+                                method: "PATCH",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({ description: editValue })
+                              });
+                              fetchInteractions();
+                            }
+                            setEditingIdx(null);
+                          }
+                        }}
+                        style={{
+                          width: "90%",
+                          background: "#181a1b",
+                          color: "#e8e6e3",
+                          border: "1px solid #444",
+                          borderRadius: 4,
+                          padding: "4px 8px"
+                        }}
+                        autoFocus
+                      />
+                    ) : (
+                      inter.description
+                    )}
                   </span>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleEdit(e);
+                    }}
+                    title={isEditing ? "Save" : "Edit description"}
+                    style={{
+                      marginLeft: 8,
+                      marginRight: 0,
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      color: isEditing ? "#4caf50" : "#8ab4f8",
+                      fontSize: "1.2em"
+                    }}
+                    type="button"
+                  >
+                    {isEditing ? "💾" : "✏️"}
+                  </button>
+                  <button
+                    onClick={e => {
+                      e.stopPropagation();
+                      handleDelete(inter.id);
+                    }}
+                    title="Delete interaction"
+                    style={{
+                      marginLeft: 8,
+                      border: "none",
+                      background: "none",
+                      cursor: "pointer",
+                      color: "#e57373",
+                      fontSize: "1.2em"
+                    }}
+                    type="button"
+                  >
+                    🗑️
+                  </button>
                   <span style={{ marginLeft: 12, flexShrink: 0 }}>{isOpen ? "▲" : "▼"}</span>
                 </div>
                 <span
@@ -351,127 +522,5 @@ export default function AddInteractionPage() {
           </button>
         </div>
       )}
-      <div id="vspace" style={{ height: 10 }}></div>
-      {!showAddInteraction ? (
-        <div
-          style={{
-            border: "1.5px dashed #444",
-            borderRadius: 8,
-            padding: 20,
-            marginBottom: 24,
-            background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
-            color: document.body.classList.contains("light-mode") ? "#23272a" : "#e8e6e3",
-            textAlign: "center",
-            cursor: "pointer"
-          }}
-          onClick={() => setShowAddInteraction(true)}
-        >
-          Click to add interaction
-        </div>
-      ) : (
-        <div
-          id="add-interaction"
-          style={{
-            border: "1.5px solid #444",
-            borderRadius: 8,
-            padding: 20,
-            marginBottom: 24,
-            background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
-            position: "relative"
-          }}
-        >
-          <span
-            onClick={() => setShowAddInteraction(false)}
-            style={{
-              position: "absolute",
-              top: 8,
-              right: 16,
-              color: "#8ab4f8",
-              cursor: "pointer",
-              fontWeight: 500,
-              fontSize: "1em"
-            }}
-            title="Hide"
-          >
-            Hide
-          </span>
-          <form onSubmit={handleSubmit}>
-            <div>
-              <textarea
-                value={description}
-                onChange={e => setDescription(e.target.value)}
-                placeholder="Interaction description"
-                required
-                rows={3}
-                style={{
-                  width: "100%",
-                  maxWidth: 400,
-                  marginBottom: 8,
-                  resize: "vertical"
-                }}
-              />
-            </div>
-            <div>
-              <input
-                type="datetime-local"
-                value={date}
-                onChange={e => setDate(e.target.value)}
-                required
-                style={{ marginBottom: 8 }}
-              />
-              <span style={{ fontSize: "0.9em", marginLeft: 8, color: "#888" }}>
-                (US Central Time)
-              </span>
-            </div>
-            <div style={{ textAlign: "right" }}>
-              <button type="submit">Add</button>
-            </div>
-          </form>
-          {success && (
-            <div style={{ color: "green", marginTop: 10 }}>
-              Interaction added!<br />
-              {createdUuid && (
-                <span>
-                  UUID:{" "}
-                  <a
-                    href={`/${createdUuid}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    style={{ color: "#8ab4f8" }}
-                  >
-                    {`${window.location.protocol}//${window.location.host}/${createdUuid}`}
-                  </a>
-                  <button
-                    onClick={handleCopy}
-                    title="Copy link"
-                    style={{
-                      marginLeft: 8,
-                      border: "none",
-                      background: "none",
-                      cursor: "pointer",
-                      color: "#8ab4f8",
-                      fontSize: "1em",
-                      verticalAlign: "middle"
-                    }}
-                    type="button"
-                  >
-                    {/* Modern copy icon: two overlapping squares */}
-                    <svg width="18" height="18" viewBox="0 0 20 20" style={{ verticalAlign: "middle" }}>
-                      <rect x="5" y="7" width="9" height="9" rx="2" fill="none" stroke="currentColor" strokeWidth="2"/>
-                      <rect x="8" y="4" width="9" height="9" rx="2" fill="none" stroke="currentColor" strokeWidth="2"/>
-                    </svg>
-                  </button>
-                  {copySuccess && (
-                    <span style={{ marginLeft: 6, color: "#8ab4f8" }}>Copied!</span>
-                  )}
-                </span>
-              )}
-            </div>
-          )}
-        </div>
-      )}
     </div>
-  );
-}
-
-
+  );}

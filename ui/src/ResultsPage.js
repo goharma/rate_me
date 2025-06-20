@@ -88,11 +88,14 @@ export default function ResultsPage() {
 
   return (
     <div>
+      <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>
       {overallAvg && (
-        <div style={{ marginBottom: 16, fontWeight: "bold" }}>
+        <div>
           Overall Average Rating: {overallAvg} / 5
         </div>
-      )}
+      )}        
+      </h2>
+
       <div style={{
         marginBottom: 16,
         background: document.body.classList.contains("light-mode") ? "#f5f5f5" : undefined,
