@@ -1,5 +1,15 @@
 # rate_me
 
+# Build 
+npm build 
+
+# Run 
+## Service 
+
+##  UI
+npm start 
+
+
 
 create a fastapi micro service app inder service with sqlalchemy using sqlite.  
 
@@ -23,3 +33,12 @@ the endpoints should be:
     patch: modify interaction
 
 Under ui create a react js application that will allow someone to rate and allow someone else to add interations and view them 
+
+
+Interaction Description
+Avg: 
+link 
+
+
+Interaction Description
+Date of Interaction: MM/DD/YYY, HH:MM AM/PM

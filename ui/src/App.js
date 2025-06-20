@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Routes, Route, Link, useLocation } from "react-router-dom";
 import RatePage from "./RatePage";
 import AddInteractionPage from "./AddInteractionPage";
 import ViewInteractionPage from "./ViewInteractionPage";
@@ -86,24 +86,85 @@ function InteractionsList() {
 }
 
 export default function App() {
+  const location = useLocation();
   return (
-    <Router>
-      <div style={{ maxWidth: 600, margin: "auto", padding: 20 }}>
-        <h1>Rate Me</h1>
-        <nav style={{ marginBottom: 20 }}>
-          <Link to="/" style={{ marginRight: 10 }}>Rate Interactions</Link>
-          <Link to="/add" style={{ marginRight: 10 }}>Add Interaction</Link>
-          <Link to="/results">Rating Results</Link>
-        </nav>
-        <Routes>
-          <Route path="/" element={<RatePage />} />
-          <Route path="/add" element={<AddInteractionPage />} />
-          <Route path="/interaction/:uuid" element={<ViewInteractionPage />} />
-          <Route path="/results" element={<ResultsPage />} />
-          <Route path="/:uuid" element={<RatePage />} />
-        </Routes>
-      </div>
-    </Router>
+    <div style={{ maxWidth: 600, margin: "auto", padding: 20 }}>
+      <h1>Rate Me</h1>
+      <nav
+        style={{
+          marginBottom: 24,
+          display: "flex",
+          gap: 16,
+          background: "rgba(35,39,42,0.95)",
+          borderRadius: 12,
+          boxShadow: "0 2px 12px 0 rgba(0,0,0,0.15)",
+          padding: "12px 24px",
+          alignItems: "center",
+          justifyContent: "center",
+          fontWeight: 500,
+          fontSize: "1.1em",
+          position: "relative",
+          zIndex: 2
+        }}
+      >
+        <Link
+          to="/"
+          style={{
+            color: "#8ab4f8",
+            textDecoration: "none",
+            padding: "8px 18px",
+            borderRadius: 8,
+            transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+            background: location.pathname === "/" ? "#23272a" : "transparent",
+            boxShadow: location.pathname === "/" ? "0 2px 8px 0 rgba(138,180,248,0.08)" : "none",
+            fontWeight: location.pathname === "/" ? 700 : 500,
+            border: location.pathname === "/" ? "2px solid #8ab4f8" : "2px solid transparent"
+          }}
+        >
+          Rate Interactions
+        </Link>
+        <Link
+          to="/add"
+          style={{
+            color: "#8ab4f8",
+            textDecoration: "none",
+            padding: "8px 18px",
+            borderRadius: 8,
+            transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+            background: location.pathname === "/add" ? "#23272a" : "transparent",
+            boxShadow: location.pathname === "/add" ? "0 2px 8px 0 rgba(138,180,248,0.08)" : "none",
+            fontWeight: location.pathname === "/add" ? 700 : 500,
+            border: location.pathname === "/add" ? "2px solid #8ab4f8" : "2px solid transparent"
+          }}
+        >
+          Interactions
+        </Link>
+        <Link
+          to="/results"
+          style={{
+            color: "#8ab4f8",
+            textDecoration: "none",
+            padding: "8px 18px",
+            borderRadius: 8,
+            transition: "background 0.2s, color 0.2s, box-shadow 0.2s",
+            background: location.pathname === "/results" ? "#23272a" : "transparent",
+            boxShadow: location.pathname === "/results" ? "0 2px 8px 0 rgba(138,180,248,0.08)" : "none",
+            fontWeight: location.pathname === "/results" ? 700 : 500,
+            border: location.pathname === "/results" ? "2px solid #8ab4f8" : "2px solid transparent"
+          }}
+        >
+          Results
+        </Link>
+      </nav>
+      <Routes>
+        <Route path="/" element={<RatePage />} />
+        <Route path="/add" element={<AddInteractionPage />} />
+        <Route path="/interaction/:uuid" element={<ViewInteractionPage />} />
+        <Route path="/results" element={<ResultsPage />} />
+        <Route path="/:uuid" element={<RatePage />} />
+      </Routes>
+    </div>
   );
 }
+
 

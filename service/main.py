@@ -1,17 +1,19 @@
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy.orm import Session
-from . import models, schemas, crud
+from . import models, crud
 from .database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
+
+# Use models.Interaction, not db.Interaction
+from .models import Interaction
+from . import schemas
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
-
-# Add CORS middleware
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000"],
+    allow_origins=["*"],  # Or specify ["http://localhost:3000"] for more security
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -23,6 +25,12 @@ def get_db():
         yield db
     finally:
         db.close()
+
+@app.get("/interactions", response_model=list[schemas.Interaction])
+def get_all_interactions(db: Session = Depends(get_db)):
+    interactions = db.query(Interaction).all()
+    return interactions
+
 
 @app.post("/interaction", response_model=schemas.Interaction)
 def create_interaction(interaction: schemas.InteractionCreate, db: Session = Depends(get_db)):
@@ -60,6 +68,10 @@ def get_rate(rate_id: int, db: Session = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Rate not found")
     return db_rate
 
+
 if __name__ == "__main__":
     import uvicorn
     uvicorn.run("service.main:app", host="127.0.0.1", port=8000, reload=True)
+
+
+

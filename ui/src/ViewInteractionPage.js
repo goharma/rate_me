@@ -52,16 +52,20 @@ function RateInteraction({ interactionId, onRated }) {
 export default function ViewInteractionPage() {
   const { uuid } = useParams();
   const [interaction, setInteraction] = useState(null);
+  const [loading, setLoading] = useState(true);
 
   const fetchInteraction = async () => {
+    setLoading(true);
     const res = await fetch(`${API}/interaction/by-uuid/${uuid}`);
     if (res.ok) {
       setInteraction(await res.json());
     }
+    setLoading(false);
   };
 
   useEffect(() => { fetchInteraction(); }, [uuid]);
 
+  if (loading) return <div>Loading...</div>;
   if (!interaction) return <div>Loading...</div>;
 
   return (
