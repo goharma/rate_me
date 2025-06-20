@@ -3,6 +3,8 @@ from sqlalchemy.orm import Session
 from . import models, crud
 from .database import SessionLocal, engine
 from fastapi.middleware.cors import CORSMiddleware
+import requests
+from fastapi import Request
 
 # Use models.Interaction, not db.Interaction
 from .models import Interaction
@@ -18,6 +20,8 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+RECAPTCHA_SECRET = "6LfKKWcrAAAAAOO3vpyOm6Zj4etJTicqlmssmrmA"  # Replace with your actual secret key
 
 def get_db():
     db = SessionLocal()
@@ -58,7 +62,22 @@ def get_interaction_by_uuid(uuid: str, db: Session = Depends(get_db)):
     return db_interaction
 
 @app.post("/rate", response_model=schemas.Rate)
-def create_rate(rate: schemas.RateCreate, db: Session = Depends(get_db)):
+async def create_rate(rate: schemas.RateCreate, request: Request, db: Session = Depends(get_db)):
+    data = await request.json()
+    captcha_token = data.get("captcha")
+    if not captcha_token:
+        raise HTTPException(status_code=400, detail="Captcha is required")
+    # Verify captcha with Google
+    resp = requests.post(
+        "https://www.google.com/recaptcha/api/siteverify",
+        data={
+            "secret": RECAPTCHA_SECRET,
+            "response": captcha_token
+        }
+    )
+    result = resp.json()
+    if not result.get("success"):
+        raise HTTPException(status_code=400, detail="Invalid captcha")
     return crud.create_rate(db, rate)
 
 @app.get("/rate/{rate_id}", response_model=schemas.Rate)

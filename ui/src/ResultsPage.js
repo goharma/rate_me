@@ -25,11 +25,47 @@ export default function ResultsPage() {
 
   useEffect(() => { fetchInteractions(); }, []);
 
-  // Calculate overall average rating
-  const allRatings = interactions.flatMap(inter => inter.rates.map(rate => rate.rating));
-  const overallAvg = allRatings.length
-    ? (allRatings.reduce((a, b) => a + b, 0) / allRatings.length).toFixed(2)
-    : null;
+  // Calculate averages for all, day, week, month
+  const now = new Date();
+  const allRatings = interactions.flatMap(inter => inter.rates.map(rate => ({ ...rate, date: inter.date })));
+  const avg = arr => arr.length ? (arr.reduce((a, b) => a + b.rating, 0) / arr.length).toFixed(2) : "N/A";
+  const avgAll = avg(allRatings);
+
+  // Calculate today's ratings (same calendar day, US Central)
+  const centralNow = new Date(now.toLocaleString("en-US", { timeZone: "America/Chicago" }));
+  const todayYear = centralNow.getFullYear();
+  const todayMonth = centralNow.getMonth();
+  const todayDate = centralNow.getDate();
+
+  const ratingsToday = allRatings.filter(r => {
+    const d = new Date(new Date(r.date).toLocaleString("en-US", { timeZone: "America/Chicago" }));
+    return (
+      d.getFullYear() === todayYear &&
+      d.getMonth() === todayMonth &&
+      d.getDate() === todayDate
+    );
+  });
+  const avgDay = avg(ratingsToday);
+
+  // Calculate week ratings (US Central)
+  const oneWeekAgo = new Date(centralNow);
+  oneWeekAgo.setDate(centralNow.getDate() - 7);
+
+  const ratingsWeek = allRatings.filter(r => {
+    const d = new Date(new Date(r.date).toLocaleString("en-US", { timeZone: "America/Chicago" }));
+    return d >= oneWeekAgo && d <= centralNow;
+  });
+  const avgWeek = avg(ratingsWeek);
+
+  // Calculate month ratings (US Central)
+  const oneMonthAgo = new Date(centralNow);
+  oneMonthAgo.setMonth(centralNow.getMonth() - 1);
+
+  const ratingsMonth = allRatings.filter(r => {
+    const d = new Date(new Date(r.date).toLocaleString("en-US", { timeZone: "America/Chicago" }));
+    return d >= oneMonthAgo && d <= centralNow;
+  });
+  const avgMonth = avg(ratingsMonth);
 
   const handleCopy = (uuid, idx) => {
     const url = `${window.location.protocol}//${window.location.host}/${uuid}`;
@@ -88,13 +124,25 @@ export default function ResultsPage() {
 
   return (
     <div>
-      <h2 style={{ fontSize: "1.5em", fontWeight: 700, margin: "16px 0" }}>
-      {overallAvg && (
-        <div>
-          Overall Average Rating: {overallAvg} / 5
+      <div style={{ fontSize: "12px", fontWeight: 700, margin: "16px 0", textAlign: "left", lineHeight: "1.7" }}>
+        Average Rating:
+        <div style={{ display: "flex", gap: 8 }}>
+          <span style={{ minWidth: 60 }}>All:</span>
+          <span>{avgAll} ({allRatings.length})</span>
         </div>
-      )}        
-      </h2>
+        <div style={{ display: "flex", gap: 8 }}>
+          <span style={{ minWidth: 60 }}>Today:</span>
+          <span>{avgDay} ({ratingsToday.length})</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <span style={{ minWidth: 60 }}>Week:</span>
+          <span>{avgWeek} ({ratingsWeek.length})</span>
+        </div>
+        <div style={{ display: "flex", gap: 8 }}>
+          <span style={{ minWidth: 60 }}>Month:</span>
+          <span>{avgMonth} ({ratingsMonth.length})</span>
+        </div>
+      </div>
 
       <div style={{
         marginBottom: 16,

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import ReCAPTCHA from "react-google-recaptcha";
 
 function StarRating({ value, onChange }) {
   return (
@@ -24,14 +25,19 @@ function RateInteraction({ interactionId, onRated }) {
   const [comment, setComment] = useState("");
   const [rating, setRating] = useState(5);
   const [thankYou, setThankYou] = useState(false);
+  const [captcha, setCaptcha] = useState(null);
   const navigate = useNavigate();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    if (!captcha) {
+      alert("Please complete the captcha.");
+      return;
+    }
     await fetch(`http://localhost:8000/rate`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ interaction_id: interactionId, comment, rating }),
+      body: JSON.stringify({ interaction_id: interactionId, comment, rating, captcha }),
     });
     setComment("");
     setRating(5);
@@ -66,7 +72,27 @@ function RateInteraction({ interactionId, onRated }) {
       <br />
       <StarRating value={rating} onChange={setRating} />
       <br />
-      <button type="submit">Rate</button>
+      <div style={{ margin: "12px 0" }}>
+        <ReCAPTCHA
+          sitekey="6LfKKWcrAAAAADgt0vmbByziwUZpv2KKzrnx1PxA"
+          onChange={setCaptcha}
+        />
+      </div>
+      <button
+        type="submit"
+        disabled={!captcha}
+        style={{
+          background: !captcha ? "#444" : "#30363d",
+          color: "#e8e6e3",
+          border: "1px solid #444",
+          borderRadius: 4,
+          cursor: !captcha ? "not-allowed" : "pointer",
+          opacity: !captcha ? 0.6 : 1,
+          padding: "6px 18px"
+        }}
+      >
+        Rate
+      </button>
     </form>
   );
 }
