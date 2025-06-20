@@ -1,7 +1,7 @@
 # rate_me
 
 # Build 
-npm build 
+npm run build 
 
 # Run 
 ## Service 
