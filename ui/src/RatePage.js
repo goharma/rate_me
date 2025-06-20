@@ -38,7 +38,10 @@ function RateInteraction({ interactionId, onRated }) {
     setThankYou(true);
     setTimeout(() => {
       setThankYou(false);
-      navigate("/");
+      // Only redirect if not on a uuid page
+      if (!window.location.pathname.match(/^\/[0-9a-fA-F\-]{36}$/)) {
+        navigate("/");
+      }
     }, 3000);
     if (onRated) onRated();
   };
@@ -82,10 +85,9 @@ export default function RatePage() {
   useEffect(() => {
     setLoading(true);
     if (!uuid) {
-      // Fetch all interactions from a paginated or list endpoint instead of guessing IDs
+      // Fetch all interactions from the backend in one request
       const fetchAll = async () => {
         let arr = [];
-        // Try to use a list endpoint if available
         const res = await fetch(`http://localhost:8000/interactions`);
         if (res.ok) {
           arr = await res.json();
@@ -106,6 +108,21 @@ export default function RatePage() {
     fetchInteraction();
   }, [uuid]);
 
+  // Helper for US Central time formatting
+  const formatCentralTime = (dateStr) => {
+    // Parse as UTC, then convert to US Central
+    const utc = new Date(dateStr + "Z");
+    return utc.toLocaleString("en-US", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true
+    });
+  };
+
   if (!uuid) {
     const filtered = allInteractions.filter(inter =>
       inter.description.toLowerCase().includes(search.toLowerCase())
@@ -116,7 +133,9 @@ export default function RatePage() {
     if (loading) return <div>Loading...</div>;
     return (
       <div>
+        <h2>Rate Interactions</h2>
         <input
+          className="search-box"
           type="text"
           placeholder="Search by description"
           value={search}
@@ -157,76 +176,50 @@ export default function RatePage() {
           </div>
         )}
         <div>
-          {paged.map((inter, idx) => {
-            const isOpen = openIndex === idx;
-            return (
-              <div
-                key={inter.id}
+          {paged.map((inter) => (
+            <div
+              key={inter.id}
+              className="accordion-summary"
+              style={{
+                cursor: "default",
+                padding: "10px 20px",
+                fontWeight: "bold",
+                background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+                borderRadius: "6px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                minHeight: 32,
+                marginBottom: 12
+              }}
+            >
+              <span
                 style={{
-                  marginBottom: 12,
-                  borderRadius: 6,
-                  background: "#23272a",
-                  border: "1px solid #444"
+                  whiteSpace: "nowrap",
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  display: "block",
+                  maxWidth: "80vw"
                 }}
+                title={inter.description}
               >
-                <div
-                  style={{
-                    cursor: "pointer",
-                    padding: "10px 20px",
-                    fontWeight: "bold",
-                    background: isOpen ? "#30363d" : "#23272a",
-                    borderRadius: "6px 6px 0 0",
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "space-between"
-                  }}
-                  onClick={() => setOpenIndex(isOpen ? null : idx)}
-                >
-                  <span
-                    style={{
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "block",
-                      maxWidth: "80vw"
-                    }}
-                    title={inter.description}
-                  >
-                    {inter.description}
-                  </span>
-                  <span>{isOpen ? "▲" : "▼"}</span>
-                </div>
-                {isOpen && (
-                  <div style={{ padding: "10px 20px", borderTop: "1px solid #444" }}>
-                    <div style={{
-                      marginBottom: 8,
-                      whiteSpace: "nowrap",
-                      overflow: "hidden",
-                      textOverflow: "ellipsis",
-                      display: "block",
-                      maxWidth: "80vw"
-                    }}
-                      title={inter.description}
-                    >
-                      <b>{inter.description}</b>
-                    </div>
-                    <button
-                      style={{
-                        background: "#30363d",
-                        color: "#8ab4f8",
-                        border: "1px solid #444",
-                        borderRadius: 4,
-                        cursor: "pointer"
-                      }}
-                      onClick={() => navigate(`/${inter.uuid}`)}
-                    >
-                      Rate
-                    </button>
-                  </div>
-                )}
-              </div>
-            );
-          })}
+                {inter.description}
+              </span>
+              <button
+                style={{
+                  background: "#30363d",
+                  color: "#8ab4f8",
+                  border: "1px solid #444",
+                  borderRadius: 4,
+                  cursor: "pointer",
+                  marginLeft: 16
+                }}
+                onClick={() => navigate(`/${inter.uuid}`)}
+              >
+                Rate
+              </button>
+            </div>
+          ))}
         </div>
         {totalPages > 1 && (
           <div style={{ marginTop: 20, display: "flex", justifyContent: "center", alignItems: "center" }}>
@@ -256,22 +249,9 @@ export default function RatePage() {
   if (loading) return <div>Loading...</div>;
   if (!interaction) return <div>Loading...</div>;
 
-  // Helper for US Central time formatting
-  const formatCentralTime = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleString("en-US", {
-      timeZone: "America/Chicago",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: true
-    });
-  };
-
   return (
     <div>
+      <h2>Rate Interaction</h2>
       <div style={{ marginBottom: 16 }}>
         <b>Interaction Description</b>
         <div>{interaction.description}</div>

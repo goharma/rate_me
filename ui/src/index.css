@@ -56,3 +56,54 @@ ul {
 form {
   margin-bottom: 16px;
 }
+
+body.dark-mode {
+  background: #181a1b;
+  color: #e8e6e3;
+}
+body.light-mode {
+  background: #fff;
+  color: #23272a;
+}
+body.light-mode input,
+body.light-mode select,
+body.light-mode button,
+body.light-mode textarea {
+  background: #f5f5f5;
+  color: #23272a;
+  border: 1px solid #bbb;
+}
+body.light-mode nav {
+  background: #f5f5f5 !important;
+}
+body.light-mode ul {
+  background: #fff !important;
+  color: #23272a !important;
+}
+body.light-mode form {
+  background: #fff !important;
+  color: #23272a !important;
+}
+body.light-mode a {
+  color: #1976d2;
+}
+body.light-mode .accordion-summary,
+body.light-mode .accordion-summary * {
+  background: #f5f5f5 !important;
+  color: #23272a !important;
+}
+body.light-mode .accordion-content {
+  background: #fff !important;
+  color: #23272a !important;
+}
+body.light-mode .search-box {
+  background: #f5f5f5 !important;
+  color: #23272a !important;
+  border: 1px solid #bbb !important;
+}
+body.light-mode .menu-link-active {
+  background: #e3e8ef !important;
+  color: #1976d2 !important;
+  border: 2px solid #1976d2 !important;
+  font-weight: 700 !important;
+}

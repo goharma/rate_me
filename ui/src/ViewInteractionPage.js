@@ -49,6 +49,20 @@ function RateInteraction({ interactionId, onRated }) {
   );
 }
 
+const formatCentralTime = (dateStr) => {
+  const utc = new Date(dateStr + "Z");
+  return utc.toLocaleString("en-US", {
+    timeZone: "America/Chicago",
+    year: "numeric",
+    month: "short",
+    day: "numeric",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+    hour12: true
+  });
+};
+
 export default function ViewInteractionPage() {
   const { uuid } = useParams();
   const [interaction, setInteraction] = useState(null);
@@ -72,7 +86,7 @@ export default function ViewInteractionPage() {
     <div>
       <h2>Interaction</h2>
       <div>
-        <b>{interaction.description}</b> <i>({new Date(interaction.date).toLocaleString()})</i>
+        <b>{interaction.description}</b> <i>({formatCentralTime(interaction.date)})</i>
         <div>
           <span>UUID: <code>{interaction.uuid}</code></span>
         </div>

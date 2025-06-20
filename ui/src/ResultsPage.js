@@ -14,11 +14,10 @@ export default function ResultsPage() {
   const fetchInteractions = async () => {
     setLoading(true);
     let arr = [];
-    for (let i = 1; i <= 20; ++i) {
-      const res = await fetch(`${API}/interaction/${i}`);
-      if (res.ok) {
-        arr.push(await res.json());
-      }
+    // Fetch all interactions from the backend in one request
+    const res = await fetch(`${API}/interactions`);
+    if (res.ok) {
+      arr = await res.json();
     }
     setInteractions(arr);
     setLoading(false);
@@ -42,15 +41,16 @@ export default function ResultsPage() {
 
   // Helper for US Central time formatting
   const formatCentralTime = (dateStr) => {
-    const date = new Date(dateStr);
-    return date.toLocaleString("en-US", { 
-      timeZone: "America/Chicago", 
-      year: "numeric", 
-      month: "short", 
-      day: "numeric", 
-      hour: "2-digit", 
-      minute: "2-digit", 
-      second: "2-digit" 
+    const utc = new Date(dateStr + "Z");
+    return utc.toLocaleString("en-US", {
+      timeZone: "America/Chicago",
+      year: "numeric",
+      month: "short",
+      day: "numeric",
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+      hour12: true
     });
   };
 
@@ -93,15 +93,20 @@ export default function ResultsPage() {
           Overall Average Rating: {overallAvg} / 5
         </div>
       )}
-      <div style={{ marginBottom: 16 }}>
+      <div style={{
+        marginBottom: 16,
+        background: document.body.classList.contains("light-mode") ? "#f5f5f5" : undefined,
+        borderRadius: 8,
+        padding: 8
+      }}>
         <input
           type="text"
           placeholder="Search by description or comment"
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(1); }}
           style={{
-            background: "#23272a",
-            color: "#e8e6e3",
+            background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+            color: document.body.classList.contains("light-mode") ? "#23272a" : "#e8e6e3",
             border: "1px solid #444",
             borderRadius: 4,
             padding: "6px 10px",
@@ -111,12 +116,17 @@ export default function ResultsPage() {
           }}
         />
         <br />
-        <label htmlFor="sortBy" style={{ marginRight: 8 }}>Sort By:</label>
+        <label htmlFor="sortBy" style={{ marginRight: 8, color: document.body.classList.contains("light-mode") ? "#23272a" : undefined }}>Sort By:</label>
         <select
           id="sortBy"
           value={sortBy}
           onChange={e => { setSortBy(e.target.value); setPage(1); }}
-          style={{ background: "#23272a", color: "#e8e6e3", border: "1px solid #444", borderRadius: 4 }}
+          style={{
+            background: document.body.classList.contains("light-mode") ? "#f5f5f5" : "#23272a",
+            color: document.body.classList.contains("light-mode") ? "#23272a" : "#e8e6e3",
+            border: "1px solid #444",
+            borderRadius: 4
+          }}
         >
           <option value="rating_desc">Average Rating (Highest First)</option>
           <option value="rating_asc">Average Rating (Lowest First)</option>
@@ -154,9 +164,18 @@ export default function ResultsPage() {
             ? (ratings.reduce((a, b) => a + b, 0) / ratings.length).toFixed(2)
             : null;
           const isOpen = openIndex === idx;
+          let sortValue = "";
+          if (sortBy === "rating_desc" || sortBy === "rating_asc") {
+            sortValue = avg !== null ? avg : "N/A";
+          } else if (sortBy === "numratings_desc" || sortBy === "numratings_asc") {
+            sortValue = inter.rates.length;
+          } else if (sortBy === "date_desc" || sortBy === "date_asc") {
+            sortValue = formatCentralTime(inter.date);
+          }
           return (
             <div key={inter.id} style={{ marginBottom: 12, borderRadius: 6, background: "#23272a", border: "1px solid #444" }}>
               <div
+                className="accordion-summary"
                 style={{
                   cursor: "pointer",
                   padding: "10px 20px",
@@ -164,29 +183,46 @@ export default function ResultsPage() {
                   background: isOpen ? "#30363d" : "#23272a",
                   borderRadius: "6px 6px 0 0",
                   display: "flex",
-                  alignItems: "center",
-                  justifyContent: "space-between",
-                  minHeight: 32
+                  flexDirection: "column",
+                  alignItems: "flex-start",
+                  justifyContent: "center",
+                  minHeight: 32,
+                  position: "relative",
+                  width: "100%",
+                  boxSizing: "border-box",
+                  overflow: "hidden"
                 }}
                 onClick={() => setOpenIndex(isOpen ? null : idx)}
               >
+                <div style={{ display: "flex", width: "100%", alignItems: "center" }}>
+                  <span
+                    style={{
+                      overflow: "hidden",
+                      textOverflow: "ellipsis",
+                      whiteSpace: "nowrap",
+                      display: "block",
+                      flex: 1,
+                      minWidth: 0
+                    }}
+                    title={inter.description}
+                  >
+                    {inter.description}
+                  </span>
+                  <span style={{ marginLeft: 12, flexShrink: 0 }}>{isOpen ? "▲" : "▼"}</span>
+                </div>
                 <span
                   style={{
-                    whiteSpace: "nowrap",
-                    overflow: "hidden",
-                    textOverflow: "ellipsis",
-                    display: "block",
-                    maxWidth: "calc(100% - 32px)",
-                    flex: 1
+                    fontWeight: 400,
+                    fontSize: "0.95em",
+                    color: "#8ab4f8",
+                    marginTop: 2
                   }}
-                  title={inter.description}
                 >
-                  {inter.description}
+                  ({sortValue})
                 </span>
-                <span style={{ marginLeft: 12, flexShrink: 0 }}>{isOpen ? "▲" : "▼"}</span>
               </div>
               {isOpen && (
-                <div style={{ padding: "10px 20px", borderTop: "1px solid #444" }}>
+                <div className="accordion-content" style={{ padding: "10px 20px", borderTop: "1px solid #444" }}>
                   <ul>
                     {inter.rates.length === 0 && <li><i>No ratings yet</i></li>}
                     {inter.rates.map(rate => (
@@ -228,3 +264,4 @@ export default function ResultsPage() {
     </div>
   );
 }
+

@@ -5,9 +5,12 @@ npm build
 
 # Run 
 ## Service 
+source .venv/bin/activate
+(.venv) koy@monkeyturd:/mnt/c/Users/koydo/repos/rate_me$ python3 -m service.main
 
 ##  UI
-npm start 
+cd ui
+npm start
 
 
 

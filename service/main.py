@@ -1,4 +1,4 @@
-from fastapi import FastAPI, HTTPException, Depends
+from fastapi import FastAPI, HTTPException, Depends, status
 from sqlalchemy.orm import Session
 from . import models, crud
 from .database import SessionLocal, engine
@@ -67,6 +67,17 @@ def get_rate(rate_id: int, db: Session = Depends(get_db)):
     if not db_rate:
         raise HTTPException(status_code=404, detail="Rate not found")
     return db_rate
+
+@app.delete("/interaction/{interaction_id}", status_code=204)
+def delete_interaction(interaction_id: int, db: Session = Depends(get_db)):
+    interaction = db.query(Interaction).filter(Interaction.id == interaction_id).first()
+    if not interaction:
+        raise HTTPException(status_code=404, detail="Interaction not found")
+    # Delete all rates associated with this interaction first to avoid integrity error
+    db.query(models.Rate).filter(models.Rate.interaction_id == interaction_id).delete()
+    db.delete(interaction)
+    db.commit()
+    return
 
 
 if __name__ == "__main__":
